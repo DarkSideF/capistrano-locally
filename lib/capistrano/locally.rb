@@ -13,8 +13,16 @@ module Capistrano
 
     def on(hosts, options={}, &block)
       return unless hosts
-      localhosts, remotehosts = hosts.partition { |h| h.hostname.to_s == 'localhost' }
-      localhost = Configuration.env.filter(localhosts).first
+      if hosts.is_a? Capistrano::Configuration::Server
+        if hosts.hostname.to_s == 'localhost'
+          localhost = hosts
+        else
+          localhost = nil
+        end
+      else
+        localhosts, remotehosts = hosts.partition { |h| h.hostname.to_s == 'localhost' }
+        localhost = Configuration.env.filter(localhosts).first
+      end
 
       unless localhost.nil?
         if dry_run?
